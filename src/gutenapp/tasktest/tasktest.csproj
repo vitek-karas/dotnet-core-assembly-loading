@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\interfaces\interfaces.csproj" />
+    <Reference Include="..\wordcount\bin\1.2\Debug\netstandard2.0\wordcount.dll" />
   </ItemGroup>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>$(WordCountAssemblyVersion)</AssemblyVersion>
   </PropertyGroup>
 
 </Project>

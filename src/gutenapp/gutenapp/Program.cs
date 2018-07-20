@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 using interfaces;
@@ -33,10 +34,34 @@ namespace guttenapp
                 throw new Exception();
             }
 
+            //Assembly.LoadFrom(wordCountPath);
+
             var (wordcountContext, wordCountAsm) = ComponentContext.CreateContext(wordCountPath);
 
             var (mostcommonwordsContext, mostcommonwordsAsm) = ComponentContext.CreateContext(mostcommonwordsPath);
-            
+
+            // var (taskTestFound, taskTestPath, taskTestCandidates) = assemblyResolver.GetComponentLibrary("tasktest");
+
+            // var (taskTestContext, taskTestAsm) = ComponentContext.CreateContext(taskTestPath);
+
+            var taskTestAsm = Assembly.LoadFrom(@"F:\AppModel\dotnet-core-assembly-loading\src\gutenapp\tasktest\bin\Debug\netstandard2.0\tasktest.dll");
+
+            dynamic taskTest = taskTestAsm.CreateInstance("Lit.TaskTest");
+            Console.WriteLine(taskTest.TestIt());
+
+            // string wordCountV2Path = Path.GetFullPath(Path.Join(AppContext.BaseDirectory, "../../../../wordcount/bin/1.2/Debug/netstandard2.0/wordcount.dll"));
+
+            // var wordcount2 = Assembly.LoadFile(wordCountV2Path);
+            // Console.WriteLine($"{wordcount2.FullName} {wordcount2.Location} {AssemblyLoadContext.GetLoadContext(wordcount2) == AssemblyLoadContext.Default}");
+
+            // wordcount2 = Assembly.LoadFrom(wordCountV2Path);
+            // Console.WriteLine($"{wordcount2.FullName} {wordcount2.Location} {AssemblyLoadContext.GetLoadContext(wordcount2) == AssemblyLoadContext.Default}");
+
+            // wordcount2 = Assembly.LoadFile(wordCountPath);
+            // Console.WriteLine($"{wordcount2.FullName} {wordcount2.Location} {AssemblyLoadContext.GetLoadContext(wordcount2) == AssemblyLoadContext.Default}");
+
+            ReportAssemblies(wordcountContext, mostcommonwordsContext);
+
             var client = new HttpClient();
 
             foreach(var book in books)
@@ -84,6 +109,12 @@ namespace guttenapp
             }
 
             Console.WriteLine();
+            
+            ReportAssemblies(wordcountContext, mostcommonwordsContext);
+        }
+
+        private static void ReportAssemblies(AssemblyLoadContext wordcountContext, AssemblyLoadContext mostcommonwordsContext)
+        {
             foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 var context = AssemblyLoadContext.GetLoadContext(asm);
@@ -97,10 +128,9 @@ namespace guttenapp
                     continue;
                 }
 
-                Console.WriteLine($"{asm.FullName}");
-                Console.WriteLine($"Default: {isDefaultContext}; WordCount: {isWordcountContext}; MostCommonWords: {isMostcommonwordsContext}");
+                Console.WriteLine($"{asm.FullName}  {(asm.IsDynamic ? "" : asm.Location)}");
+                Console.WriteLine($"{context.GetType().Name} Default: {isDefaultContext}; WordCount: {isWordcountContext}; MostCommonWords: {isMostcommonwordsContext}");
             }
-            
         }
     }
 }
